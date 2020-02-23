@@ -1,0 +1,59 @@
+version: "3.0"
+
+services:
+  mattermost:
+    image: mattermost/mattermost-preview
+    container_name: mattermost
+    environment:
+      - MM_SERVICESETTINGS_ALLOWEDUNTRUSTEDINTERNALCONNECTIONS='localhost 0.0.0.0/0 192.168.0.0/16'
+    ports:
+      - "8065:8065"
+    networks:
+      - chatops.net
+  isac:
+    build: ./hubot
+    container_name: isac
+    env_file:
+      - .env
+    ports:
+      - "8086:8086"
+      - "18086:19999"
+    networks:
+      - chatops.net
+  netdata.master:
+    image: netdata/netdata
+    container_name: netdata.master
+    ports:
+      - "19999:19999"
+    networks:
+      - chatops.net
+    environment:
+      - "MATTERMOST_INCOME_URL=${MATTERMOST_INCOME_URL}"
+    volumes:
+      - ./netdata-master/stream.master.conf:/etc/netdata/stream.conf
+      - ./netdata-master/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
+  jenkins:
+    image: rodrigogrohl/missao-devops-jenkins:2.2.2
+    container_name: jenkins
+    volumes:
+      - $HOME/.ssh:/var/jenkins_home/.ssh/
+    ports:
+      - "8081:8080"
+    networks:
+      - chatops.net
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: "localhost"
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost:9090'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+    ports:
+      - "9090:9090"
+      - "2224:22"
+    networks:
+      - chatops.net
+networks:
+  chatops.net:
+    driver: bridge

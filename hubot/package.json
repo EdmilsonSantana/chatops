@@ -2,7 +2,7 @@
   "name": "isac",
   "version": "0.0.0",
   "private": true,
-  "author": "EdmilsonSantana <edmilsonmgsantana@gmail.com>",
+  "author": "EdmilsonSantana",
   "description": "A simple helpful robot for your Company",
   "dependencies": {
     "hubot": "^3.3.2",
